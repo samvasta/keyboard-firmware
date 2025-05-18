@@ -1,0 +1,72 @@
+#pragma once
+
+#include "Keyboard.h"
+
+#define KEY_BSPC KEY_BACKSPACE
+#define KEY_PSCR	KEY_PRINTSCREEN
+#define KEY_DEL		KEY_DELETE
+#define KEY_INS		KEY_INSERT
+#define KEY_SPC		' '
+#define KEY_ENT	KEY_RETURN
+#define KEY_LCTL	KEY_LEFT_CTRL
+#define KEY_LSFT	KEY_LEFT_SHIFT
+#define KEY_LALT	KEY_LEFT_ALT
+#define KEY_LGUI	KEY_LEFT_GUI
+#define KEY_RCTL	KEY_RIGHT_CTRL
+#define KEY_RSFT	KEY_RIGHT_SHIFT
+#define KEY_RALT	KEY_RIGHT_ALT
+#define KEY_RGUI	KEY_RIGHT_GUI
+#define KEY_PGDN	KEY_PAGE_DOWN
+#define KEY_PGUP	KEY_PAGE_UP
+#define KEY_VOLD	KEY_MEDIA_VOLUME_DEC
+#define KEY_VOLU	KEY_MEDIA_VOLUME_INC
+#define KEY_MPLY	KEY_MEDIA_PLAY_PAUSE
+#define KEY_MPRV	KEY_MEDIA_PREV_TRACK
+#define KEY_MNXT	KEY_MEDIA_NEXT_TRACK
+
+#define KEY_PMNS	KEYPAD_MINUS
+#define KEY_PSLS	KEYPAD_SLASH
+#define KEY_PPLS	KEYPAD_PLUS
+#define KEY_PDOT	KEYPAD_PERIOD
+#define KEY_PAST	KEYPAD_ASTERIX
+#define KEY_P0		KEYPAD_0
+#define KEY_P1		KEYPAD_1
+#define KEY_P2		KEYPAD_2
+#define KEY_P3		KEYPAD_3
+#define KEY_P4		KEYPAD_4
+#define KEY_P5		KEYPAD_5
+#define KEY_P6		KEYPAD_6
+#define KEY_P7		KEYPAD_7
+#define KEY_P8		KEYPAD_8
+#define KEY_P9		KEYPAD_9
+
+
+#define KEY_CODE_LAYER_RANGE_START 0x6000
+
+#define CUSTOM_KEY_CODE_RANGE_START 0x6100
+
+enum custom_keycodes
+{
+  KEY_NO = CUSTOM_KEY_CODE_RANGE_START, // Opaque, No-op
+  KEY_TRANS,
+
+  KEY_COPY,
+  KEY_PASTE,
+  KEY_CUT,
+  KEY_UNDO,
+  KEY_REDO,
+  KEY_SELECT_ALL,
+
+  KEY_OSX,       // Set os mode to OSX
+  KEY_LINUX,     // Set os mode to Linux
+  KEY_OS_TOGGLE, // Toggle between os modes
+};
+
+#define L(kc) ((kc & 0xFF) | KEY_CODE_LAYER_RANGE_START)
+
+#define S(kc)		((kc & 0x00ff) | KEY_CODE_SHIFTED_CHAR)
+
+
+#define ______ KEY_TRANS
+
+#define ___ KEY_TRANS
