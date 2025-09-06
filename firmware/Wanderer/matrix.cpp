@@ -3,59 +3,94 @@
 #include <Wire.h>
 #include <MCP23017.h>
 
-#define MCP23017_ADDR 0x20
-MCP23017 mcp = MCP23017(MCP23017_ADDR);
+void setup_matrix()
+{
+	for (int r = 0; r < NUM_ROWS; r++)
+	{
+		pinMode(LH_ROW_PINS[r], INPUT_PULLUP);
+	}
+	for (int c = 0; c < NUM_COLS / 2; c++)
+	{
+		digitalWrite(LH_COL_PINS[c], HIGH);
+		pinMode(LH_COL_PINS[c], OUTPUT);
+	}
 
-#define MCP_PORT_ROW MCP23017Port::A
-#define MCP_PORT_COL MCP23017Port::B
+	init_matrix();
 
-void setup_matrix() {
-  // Right Hand
-  Wire.begin();
-
-  mcp.init();
-  mcp.portMode(MCP_PORT_ROW, 0b11111111); // Port A (Rows) is input
-  mcp.portMode(MCP_PORT_COL, 0);   // Port B (Columns) is output
-
-  mcp.writeRegister(MCP23017Register::GPIO_A, 0x00);  //Reset port A 
-  mcp.writeRegister(MCP23017Register::GPIO_B, 0x00);  //Reset port B
-
-  // Default row state is on
-  mcp.writeRegister(MCP23017Register::IPOL_A, 0xFF);
-
-  //TODO
+	Serial1.begin(9600);
 }
 
-void scan(){
-  matrix_state_t state = 0;
-  // Left hand
-  for(int r = 0; r < NUM_ROWS; r++) {
-    for(int c = 0; c < NUM_COLS/2; c++) {
-      //TODO
-    }
-  }
+void scan()
+{
 
-  // Right hand
+	// Tell follower to scan. In the meantime we'll process the left half of the matrix
+	Serial1.write('S');
+	Serial1.flush();
 
-  for(int r = 0; r < NUM_ROWS; r++) {
-    mcp.writePort(MCP_PORT_ROW, ~((uint8_t)1 << r));
-    uint8_t col_state = mcp.readPort(MCP23017Port::B);
-    for(int c = 0; c < NUM_COLS/2; c++) {
-      bool isPressed = ((col_state >> c) & 0x1);
-      state = set_key(state, r, c, isPressed);
-    }
-  }
+	matrix_state_t state = 0;
+	// Left hand
+	for (int c = 0; c < NUM_COLS / 2; c++)
+	{
+		digitalWrite(LH_COL_PINS[c], LOW);
+		// Delay for the pin to settle
+		delayMicroseconds(30);
+		// Read rows
+		for (int r = 0; r < NUM_ROWS; r++)
+		{
+			state = set_key(state, r, c, !digitalRead(LH_ROW_PINS[r]));
+		}
+		digitalWrite(LH_COL_PINS[c], HIGH);
+	}
 
-  process_matrix(state);
+	// Right hand
+	uint8_t tries = 0;
+
+	char msg_instruction[1] = {0};
+	while(!Serial1.available() && tries < 100) {
+		tries++;
+		delayMicroseconds(50);
+	}
+	if(tries >= 100) {
+		process_matrix(state);
+		return;
+	}
+
+	Serial1.readBytesUntil(0xff, msg_instruction, 1); // wait for the start byte
+
+
+	for (int i = 0; i < NUM_ROWS; i++)
+	{
+		while(!Serial1.available()) {
+			delayMicroseconds(50);
+		}
+		uint8_t row_state = Serial1.read();
+		for (int c = 0; c < NUM_COLS / 2; c++)
+		{
+			// Column is pressed if bit c is low
+			auto isPressed = (row_state >> c) & 0x1;
+			state = set_key(state, i, c + NUM_COLS / 2, isPressed);
+		}
+	}
+
+	while(!Serial1.available() && tries < 100) {
+		tries++;
+		delayMicroseconds(50);
+	}
+	Serial1.readBytesUntil(0xee, msg_instruction, 1); // wait for the end byte
+
+	process_matrix(state);
 }
 
-
-matrix_state_t set_key(matrix_state_t matrix, uint8_t row, uint8_t col, bool pressed) {
-  matrix_state_t next = matrix;
-  uint16_t index = (row * NUM_COLS + col);
-  if(pressed) {
-    return (matrix | (1 << index));
-  } else {
-    return matrix & ~((matrix_state_t)1 << index);
-  }
+matrix_state_t set_key(matrix_state_t matrix, uint8_t row, uint8_t col, bool pressed)
+{
+	matrix_state_t next = matrix;
+	uint16_t index = (row * NUM_COLS + col);
+	if (pressed)
+	{
+		return (matrix | ((matrix_state_t)1 << index));
+	}
+	else
+	{
+		return matrix & ~((matrix_state_t)1 << index);
+	}
 }

@@ -1,0 +1,27 @@
+{
+  "cSpell.words": [
+    "EEPROM"
+  ],
+  "files.associations": {
+    "board_api.h": "c",
+    "array": "cpp",
+    "deque": "cpp",
+    "list": "cpp",
+    "string": "cpp",
+    "unordered_map": "cpp",
+    "vector": "cpp",
+    "string_view": "cpp",
+    "initializer_list": "cpp",
+    "ranges": "cpp",
+    "span": "cpp",
+    "regex": "cpp",
+    "format": "cpp",
+    "text_encoding": "cpp",
+    "bitset": "cpp",
+    "chrono": "cpp",
+    "algorithm": "cpp",
+    "ostream": "cpp",
+    "sstream": "cpp"
+  },
+  "C_Cpp.default.compilerPath": "/home/sam/.arduino15/packages/rp2040/tools/pqt-gcc/4.0.1-8ec9d6f/bin/arm-none-eabi-g++"
+}

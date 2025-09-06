@@ -1,12 +1,35 @@
+#pragma once
+
 #include "matrix.h"
 #include "keys.h"
 #include "common.h"
 
+const keycode_t alphas[NUM_ALPHA_LAYERS][NUM_KEYS] = {
+  // QWERTY
+  MAKE_ALPHA_LAYER(
+      KEY_Q, KEY_W, KEY_E, KEY_R, KEY_T,        KEY_Y, KEY_U, KEY_I,     KEY_O,   KEY_P,
+      KEY_A, KEY_S, KEY_D, KEY_F, KEY_G,        KEY_H, KEY_J, KEY_K,     KEY_L,   KEY_SEMI,
+      KEY_Z, KEY_X, KEY_C, KEY_V, KEY_B,        KEY_N, KEY_M, KEY_COMMA, KEY_DOT, KEY_SLSH
+  ),
+  // QGMLWY
+  MAKE_ALPHA_LAYER(
+      KEY_Q, KEY_G, KEY_M, KEY_L, KEY_W,        KEY_B, KEY_Y, KEY_U,     KEY_V,   KEY_P,
+      KEY_D, KEY_S, KEY_T, KEY_N, KEY_R,        KEY_H, KEY_J, KEY_K,     KEY_L,   KEY_SEMI,
+      KEY_Z, KEY_X, KEY_C, KEY_V, KEY_B,        KEY_N, KEY_M, KEY_COMMA, KEY_DOT, KEY_SLSH
+  ),
+  // Nordrasil
+  MAKE_ALPHA_LAYER(
+      KEY_Q, KEY_G, KEY_M, KEY_L, KEY_W,        KEY_B, KEY_Y, KEY_U,     KEY_V,   KEY_P,
+      KEY_D, KEY_S, KEY_T, KEY_N, KEY_R,        KEY_H, KEY_J, KEY_K,     KEY_L,   KEY_SEMI,
+      KEY_Z, KEY_X, KEY_C, KEY_V, KEY_B,        KEY_N, KEY_M, KEY_COMMA, KEY_DOT, KEY_SLSH
+  ),
+};
+
 const keycode_t layers[NUM_LAYERS][NUM_KEYS] = {
   MAKE_LAYER(
-    KEY_ESC,  'q', 'w',  'e',     'r',  't',        'y',  'u',  'i',      'o', 'p', KEY_BSPC,
-    KEY_TAB,  'a', 's',  'd',     'f',  'g',        'h',  'j',  'k',      'l', ';', KEY_ENT,
-    KEY_LSFT, 'z', 'x',  'c',     'v',  'b',        'n',  'm',  ',',      '.', '/', KEY_RSFT,
+    KEY_ESC,  ___, ___,  ___,     ___,  ___,        ___,  ___,  ___,      ___, ___, KEY_BSP,
+    KEY_TAB,  ___, ___,  ___,     ___,  ___,        ___,  ___,  ___,      ___, ___, KEY_ENT,
+    KEY_LSFT, ___, ___,  ___,     ___,  ___,        ___,  ___,  ___,      ___, ___, KEY_RSFT,
                    L(2), KEY_SPC, L(1), L(3),       L(4), L(2), KEY_RSFT, L(1)
 ),
 

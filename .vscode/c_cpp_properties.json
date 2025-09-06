@@ -1,0 +1,26 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/firmware/Wanderer/**",
+                "${workspaceFolder}/firmware/Follower/**",
+                "/home/sam/.arduino15/libraries/**",
+                "/home/sam/.arduino15/packages/**",
+                "${workspaceFolder}/firmware/Wanderer/libraries/Adafruit_TinyUSB_Arduino-master/src",
+                "${workspaceFolder}/firmware/Wanderer/libraries/MCP23017/src",
+                "/home/sam/.arduino15/libraries/Keyboard/src"
+            ],
+            "defines": [
+                "USE_TINYUSB",
+                "CFG_TUD_ENABLED",
+                "CFG_TUD_HID",
+                "ARDUINO_ARCH_RP2040",
+                "ARDUINO_WAVESHARE_RP2040_ZERO"
+            ],
+            "cppStandard": "gnu++20",
+            "compilerPath": "/home/sam/.arduino15/packages/rp2040/tools/pqt-gcc/4.0.1-8ec9d6f/bin/arm-none-eabi-g++"
+        }
+    ],
+    "version": 4
+}
