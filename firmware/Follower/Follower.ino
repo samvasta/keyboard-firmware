@@ -1,5 +1,7 @@
 #include <Adafruit_TinyUSB.h>
 
+#define EMPTY_ROW 0xC0
+
 typedef signed char int8_t;
 typedef short int16_t;
 typedef long long int64_t;
@@ -16,7 +18,7 @@ const uint8_t NUM_COLS = 6;
 const uint8_t NUM_KEYS = NUM_COLS * NUM_ROWS;
 
 const uint8_t COL_PINS[] = {14, 15, 26, 27, 28, 29};
-const uint8_t ROW_PINS[] = {9, 10, 11, 8};
+const uint8_t ROW_PINS[] = {13, 12, 11, 10};
 
 typedef uint32_t matrix_state_t;
 
@@ -43,7 +45,7 @@ void setup_matrix()
 
 matrix_state_t scan()
 {
-  matrix_state_t state = 0;
+  matrix_state_t state = 0xC0C0C0C0;
   // Left hand
   for (int c = 0; c < NUM_COLS; c++)
   {
@@ -77,15 +79,14 @@ matrix_state_t set_key(matrix_state_t matrix, uint8_t row, uint8_t col, bool pre
 
 void setup()
 {
-  Serial.begin(9600);
-  Serial.println("Follower Keyboard");
-  Serial1.begin(9600);
+  // Serial.begin(9600);
+  // Serial.println("Follower Keyboard");
+  Serial1.begin(115200);
 
   setup_matrix();
 }
 
 static matrix_state_t prev_state = 0;
-
 void loop()
 {
   if (!Serial1.available())
@@ -96,12 +97,11 @@ void loop()
 
   // don't care about incoming data, just clear it out
   // it's only a signal that we should scan the matrix
-  while (Serial1.available())
-  {
+  while(Serial1.available()) {
     Serial1.read();
   }
 
-  static uint8_t row_state[NUM_ROWS] = {0,0,0,0};
+  static uint8_t row_state[NUM_ROWS] = {EMPTY_ROW, EMPTY_ROW, EMPTY_ROW, EMPTY_ROW};
 
   matrix_state_t state = scan();
 
@@ -113,21 +113,28 @@ void loop()
       row_state[i] = new_row;
     }
   }
+  // Serial.println("Starting send:");
   Serial1.write(0xff); // start byte
+  // Serial.printf("%0x %0x %0x %0x", row_state[0], row_state[1], row_state[2], row_state[3]);
   Serial1.write(row_state, sizeof(row_state));
-  Serial.printf("Sending rows info %08x:\n", state);
-  for(int i = 0; i < sizeof(row_state); i++) {
-    Serial.printf("%02x\n", row_state[i]);
-  }
+
+  // Serial.printf("Sending rows info %08x:\n", state);
+  // for(int i = 0; i < sizeof(row_state); i++) {
+  //   Serial.printf("%02x\n", row_state[i]);
+  // }
   Serial1.write(0xee); // end byte
   // clean out the write buffer so we don't loop until everything is sent
   Serial1.flush();
+  // Serial.println("End send");
 
-  // if(prev_state != state) {
+  // if (prev_state != state)
+  // {
   //   Serial.printf("%08x\n", state);
-  //   for(int r = 0; r < NUM_ROWS; r++) {
-  //     for(int c = 0; c < NUM_COLS; c++) {
-  //       Serial.print(((state >> (r*8 + c)) & 0x1) ? 'X' : '.');
+  //   for (int r = 0; r < NUM_ROWS; r++)
+  //   {
+  //     for (int c = 0; c < NUM_COLS; c++)
+  //     {
+  //       Serial.print(((state >> (r * 8 + c)) & 0x1) ? 'X' : '.');
   //     }
   //     Serial.println();
   //   }

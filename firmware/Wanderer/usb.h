@@ -12,3 +12,5 @@ void process_hid(keycode_t active_keys[], uint8_t modifiers);
 void hid_report_callback(uint8_t report_id, hid_report_type_t report_type, uint8_t const *buffer, uint16_t bufsize);
 
 void usb_write_str(const char *str, uint16_t len);
+
+void send_hid_immediately(const uint8_t keycode[6], uint8_t modifiers);

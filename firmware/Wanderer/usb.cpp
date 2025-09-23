@@ -2,6 +2,7 @@
 #include "usb.h"
 #include "matrix.h"
 #include "keys.h"
+#include "debug.h"
 
 // Report ID
 enum
@@ -50,7 +51,7 @@ void setup_usb()
     delay(10);
     TinyUSBDevice.attach();
   }
-  Serial.println("Adafruit TinyUSB HID Composite example");
+  D_println("Adafruit TinyUSB HID Composite example");
 }
 
 void usb_write_str(const char *str)
@@ -83,18 +84,17 @@ void process_hid(keycode_t active_keys[], uint8_t modifiers)
   {
     if (active_keys[i])
     {
-      if (is_hid_code(active_keys[i]))
+      if (is_consumer_control_key(active_keys[i]))
       {
-
-        if (is_consumer_control_key(active_keys[i]))
-        {
-          consumer_code = get_consumer_control_keycode(active_keys[i]);
-          break;
-        }
-        else if (pressed_count < 6)
-        {
-          keycode[pressed_count++] = active_keys[i];
-        }
+        consumer_code = get_consumer_control_keycode(active_keys[i]);
+        break;
+      }
+      else if (is_hid_code(active_keys[i]) && pressed_count < 6)
+      {
+        keycode[pressed_count++] = active_keys[i];
+      }
+      else {
+        D_printf("HID: Ignoring keycode %x (pos: %d)\n", active_keys[i], i);
       }
     }
   }
@@ -113,7 +113,7 @@ void process_hid(keycode_t active_keys[], uint8_t modifiers)
   // skip if hid is not ready e.g still transferring previous report
   if (!usb_hid.ready())
   {
-    Serial.println("usb not ready");
+    D_println("usb not ready");
     return;
   }
 
@@ -121,21 +121,21 @@ void process_hid(keycode_t active_keys[], uint8_t modifiers)
   if (consumer_code)
   {
     consumerKeyPressedPreviously = true;
-    Serial.println("usb consumer report");
+    D_println("usb consumer report");
     usb_hid.sendReport16(RID_CONSUMER_CONTROL, consumer_code);
   }
   else if (consumerKeyPressedPreviously)
   {
     consumerKeyPressedPreviously = false;
     usb_hid.sendReport16(RID_CONSUMER_CONTROL, 0);
-  }
+ }
 
   // Process keyboard
-  if (keycode[0])
+  if (keycode[0] || modifiers)
   {
     // Send report if there is key pressed
     keyPressedPreviously = true;
-    // Serial.println("usb key press");
+    // D_println("usb key press");
     usb_hid.keyboardReport(RID_KEYBOARD, modifiers, keycode);
   }
   else if (keyPressedPreviously)
@@ -146,4 +146,12 @@ void process_hid(keycode_t active_keys[], uint8_t modifiers)
     keyPressedPreviously = false;
     usb_hid.keyboardRelease(RID_KEYBOARD);
   }
+}
+
+void send_hid_immediately(const uint8_t keycode[6], uint8_t modifiers)
+{
+  uint8_t keycodes[6] = {0};
+  memcpy(keycodes, keycode, 6);
+  usb_hid.keyboardRelease(RID_KEYBOARD);
+  usb_hid.keyboardReport(RID_KEYBOARD, modifiers, keycodes);
 }

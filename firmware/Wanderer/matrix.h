@@ -13,7 +13,7 @@ const uint8_t NUM_COLS = 12;
 const uint8_t NUM_KEYS = NUM_COLS * NUM_ROWS;
 
 const uint8_t LH_COL_PINS[] = { 14, 15, 26, 27, 28, 29 };
-const uint8_t LH_ROW_PINS[] = { 9, 10, 11, 8 };
+const uint8_t LH_ROW_PINS[] = { 13, 12, 11, 10 };
 
 // #define RH_COL_PINS { A0, A1, A2, A3, A4, A5 }
 // #define RH_ROW_PINS { B0, B1, B2, B3}
@@ -39,10 +39,10 @@ typedef uint64_t matrix_state_t;
   L11, L12, L13, L14, L15,                 R15, R14, R13, R12, R11, \
   L21, L22, L23, L24, L25,                 R25, R24, R23, R22, R21 \
 ) {\
-  KEY_ESC,  L01,  L02,     L03,  L04, L05,      R05,  R04,  R03, R02, R01, KEY_BSP, \
-  KEY_TAB,  L11,  L12,     L13,  L14, L15,      R15,  R14,  R13, R12, R11, KEY_ENT, \
-  KEY_LSFT, L21,  L22,     L23,  L24, L25,      R25,  R24,  R23, R22, R21, KEY_RSFT, \
-            L(2), KEY_SPC, L(1), L(3),          L(4), L(2), KEY_RSFT, L(1) \
+  ESC,      L01,  L02,  L03, L04,  L05,      R05,  R04,  R03,  R02,  R01, BSPC, \
+  TAB,      L11,  L12,  L13, L14,  L15,      R15,  R14,  R13,  R12,  R11, ENT, \
+  CTRL_CMD, L21,  L22,  L23, L24,  L25,      R25,  R24,  R23,  R22,  R21, RSFT, \
+              L(2), SPC, L(1), L(4),     L(8), RSFT, L(2), L(1) \
 }
 
 matrix_state_t set_key(matrix_state_t matrix, uint8_t row, uint8_t col, bool pressed);

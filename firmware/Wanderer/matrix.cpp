@@ -1,7 +1,8 @@
 #include "matrix.h"
 #include "keyhandler.h"
-#include <Wire.h>
-#include <MCP23017.h>
+#include "debug.h"
+
+#define MAX_RIGHT_HAND_TRIES 100
 
 void setup_matrix()
 {
@@ -16,16 +17,22 @@ void setup_matrix()
 	}
 
 	init_matrix();
+	D_println("Init matrix done.");
 
-	Serial1.begin(9600);
+	Serial1.begin(115200);
+	// Wait for right hand to initialize
+	delay(30);
+	D_println("Init Serial1 done.");
 }
 
 void scan()
 {
-
 	// Tell follower to scan. In the meantime we'll process the left half of the matrix
-	Serial1.write('S');
-	Serial1.flush();
+	bool didPollSerial1 = false;
+	if(Serial1.availableForWrite()) {
+		Serial1.write('S');
+		didPollSerial1 = true;
+	}
 
 	matrix_state_t state = 0;
 	// Left hand
@@ -42,41 +49,58 @@ void scan()
 		digitalWrite(LH_COL_PINS[c], HIGH);
 	}
 
-	// Right hand
-	uint8_t tries = 0;
-
-	char msg_instruction[1] = {0};
-	while(!Serial1.available() && tries < 100) {
-		tries++;
-		delayMicroseconds(50);
-	}
-	if(tries >= 100) {
+	if(!didPollSerial1) {
 		process_matrix(state);
 		return;
 	}
 
-	Serial1.readBytesUntil(0xff, msg_instruction, 1); // wait for the start byte
+	// Right hand
+	uint8_t tries = 0;
+	while (!Serial1.available() && tries < MAX_RIGHT_HAND_TRIES)
+	{
+		tries++;
+		delayMicroseconds(150);
+	}
+	if (tries >= MAX_RIGHT_HAND_TRIES)
+	{
+		process_matrix(state);
+	}
+	// We have data!
 
+	uint8_t lastByte = 0;
+	while (Serial1.available() && lastByte != 0xff && tries < MAX_RIGHT_HAND_TRIES)
+	{
+		lastByte = Serial1.read();
+		tries++;
+	}
+
+	if (lastByte != 0xff || tries >= MAX_RIGHT_HAND_TRIES)
+	{
+		process_matrix(state);
+		return;
+	}
 
 	for (int i = 0; i < NUM_ROWS; i++)
 	{
-		while(!Serial1.available()) {
-			delayMicroseconds(50);
-		}
 		uint8_t row_state = Serial1.read();
+		if (row_state == 0)
+		{
+			D_println("Row state was empty, expected 2 final bits to be 0b11");
+			continue;
+		}
 		for (int c = 0; c < NUM_COLS / 2; c++)
 		{
-			// Column is pressed if bit c is low
+			// Column is pressed if bit c is high
 			auto isPressed = (row_state >> c) & 0x1;
-			state = set_key(state, i, c + NUM_COLS / 2, isPressed);
+			state = set_key(state, i, NUM_COLS - c - 1, isPressed);
 		}
 	}
 
-	while(!Serial1.available() && tries < 100) {
+	while (lastByte != 0xee && Serial1.available() && tries < MAX_RIGHT_HAND_TRIES)
+	{
+		lastByte = Serial1.read();
 		tries++;
-		delayMicroseconds(50);
 	}
-	Serial1.readBytesUntil(0xee, msg_instruction, 1); // wait for the end byte
 
 	process_matrix(state);
 }
